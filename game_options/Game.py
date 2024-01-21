@@ -1,3 +1,4 @@
+import time
 from random import randint
 
 import pygame
@@ -52,6 +53,10 @@ class Game:
         x = randint(0, self.columns - 1)
         y = randint(0, self.rows - 1)
         food = Rect(x, y)
+        while food in self.snake.parts:
+            x = randint(0, self.columns - 1)
+            y = randint(0, self.rows - 1)
+            food = Rect(x, y)
         return food
 
     def draw_food(self, food):
@@ -72,7 +77,7 @@ class Game:
                 rect.draw_rect(color, self.screen, HEADER_RECT)
 
     def check_is_win(self):
-        return len(self.snake.parts) - 1 == 2
+        return len(self.snake.parts) == self.columns * self.rows
 
     def check_inside(self, rect):
         return 0 <= rect.x <= self.columns - 1 and 0 <= rect.y <= self.rows - 1
@@ -97,8 +102,15 @@ class Game:
                     self.snake.set_speed([-1, 0])
 
     def run_game(self):
-        count = 0
         food = self.generate_random_food()
+        self.set_screen_params(font_count)
+        self.draw_map()
+        self.draw_food(food)
+        self.snake.draw(self.screen)
+        pygame.display.flip()
+        time.sleep(2)
+        count = 0
+
         while not self.game_over:
             self.handle_events()
             if self.mode == "end":
@@ -120,11 +132,10 @@ class Game:
                 font_count.render(f'Победа! Ваш счет: {count}')
                 font_count.set_rect(center=(self.width // 2, self.height // 2 + 10))
                 self.set_screen_params(font_count, FRAME_COLOR)
-
             else:
                 new_head = self.snake.head + self.snake.speed
-                if not self.check_inside(
-                        new_head) or self.snake.check_collision(new_head):
+                if (not self.check_inside(new_head) or
+                        self.snake.check_collision(new_head)):
                     self.mode = "end"
                     continue
                 self.snake.add_part(new_head)
@@ -133,6 +144,8 @@ class Game:
                     count += 1
                     font_count.render(f"Счет: {count}")
                     food = self.generate_random_food()
+                    if count % 10 == 0:
+                        self.fps += 1
 
                     if self.check_is_win():
                         self.mode = "win"
@@ -144,7 +157,5 @@ class Game:
                 self.draw_map()
                 self.snake.draw(self.screen)
                 self.draw_food(food)
-
             self.clock.tick(self.fps)
             pygame.display.flip()
-
