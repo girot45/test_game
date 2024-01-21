@@ -1,4 +1,4 @@
-DATABASE_LOCATION = "../leaderboard.db"
+DATABASE_LOCATION = "leaderboard.db"
 
 DATABASE_CREATE_TABLES = '''CREATE TABLE IF NOT EXISTS players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +20,6 @@ DATABASE_CREATE_TABLES = '''CREATE TABLE IF NOT EXISTS players (
                 game_id INTEGER NOT NULL,
                 event_description TEXT NOT NULL,
                 event_status TEXT NOT NULL,
+                datetime VARCHAR,
                 FOREIGN KEY (game_id) REFERENCES game_session(id)
             );'''
-
-

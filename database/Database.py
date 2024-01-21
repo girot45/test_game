@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from sqlite3 import connect, Cursor
 from typing import Optional
@@ -21,32 +22,45 @@ class Database:
     def create_tables(self):
         try:
             cursor = self.get_cursor()
-            cursor.execute(DATABASE_CREATE_TABLES)
+            if not os.path.isfile(DATABASE_LOCATION):
+                with open(DATABASE_LOCATION, 'w'):
+                    pass
+            for statement in DATABASE_CREATE_TABLES.split(';'):
+                cursor.execute(statement)
             self.connection.commit()
         except Exception as e:
             print(f"Произошла ошибка при создании таблиц: {e}")
             self.connection.rollback()
 
-    def check_player(self, player_name: str) -> bool:
+    def check_player(self, player_name: str):
         try:
-            if self.get_player(player_name=player_name):
-                return True
+            player = self.get_player(player_name=player_name)
+            if player:
+                return True, player
             else:
-                return False
+                return False, None
         except Exception as e:
             print(f"Произошла ошибка при поиске: {e}")
-            return False
+            return False, None
 
     def create_player(self, name: str):
         try:
             cursor = self.get_cursor()
-            self.check_player(player_name=name)
-            if not cursor.rowcount:
+            is_in_db, player = self.check_player(player_name=name)
+            if not is_in_db:
                 sql = "INSERT INTO players (name, reg_date) values ($1, $2)"
                 cursor.execute(sql, [name,
                                      datetime.now().date().strftime(
                                          "%Y-%m-%d")])
                 self.connection.commit()
+                player_id = cursor.lastrowid
+                player = Player(
+                    name=name,
+                    player_id=player_id,
+                    best_scores=0
+                )
+            return player
+
         except Exception as e:
             print(f"Произошла ошибка при добавлении игрока: {e}")
             self.connection.rollback()
@@ -57,7 +71,8 @@ class Database:
             sql = "SELECT * FROM players WHERE name = $1 LIMIT $2"
             cursor.execute(sql, [player_name, limit])
             result = cursor.fetchone()
-            if cursor.rowcount:
+
+            if result:
                 return Player(
                     player_id=result[0],
                     name=result[1],
@@ -103,7 +118,6 @@ class Database:
             print(f"Error updating game session: {e}")
             self.connection.rollback()
 
-
     def get_top_five_players(self, limit: int = 5):
         try:
             cursor = self.get_cursor()
@@ -121,18 +135,19 @@ class Database:
             event_status: str
     ):
         try:
-            with self.get_cursor() as cursor:
-                sql = ("INSERT INTO game_session_logs (game_id, event_description, event_status) "
-                       "VALUES ($1, $2, $3)")
-                cursor.execute(
-                    sql,
-                    [
-                        game_id,
-                        event_description,
-                        event_status
-                    ]
-                )
-                self.connection.commit()
+            cursor = self.get_cursor()
+            sql = ("INSERT INTO game_session_logs (game_id, event_description, event_status, "
+                   "datetime) VALUES ($1, $2, $3, $4)")
+            cursor.execute(
+                sql,
+                [
+                    game_id,
+                    event_description,
+                    event_status,
+                    datetime.now().strftime("%Y-%m-%d %H:%M")
+                ]
+            )
+            self.connection.commit()
         except Exception as e:
             # Общая обработка других исключений
             print(f"Произошла ошибка при добавлении лога: {e}")
@@ -140,4 +155,4 @@ class Database:
 
 
 db_conn = Database()
-print(db_conn.get_player("Kirill"))
+

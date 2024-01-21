@@ -3,6 +3,7 @@ from random import randint
 
 import pygame
 
+from database.Player import Player
 from game_options.Font import font_count, font_game_over
 from game_options.game_options import COLUMNS, ROWS, FONT_SIZE, PADDING, \
     RECT_COLOR_0, RECT_COLOR_1, SIZE_RECT, HEADER_RECT, FRAME_COLOR, \
@@ -10,17 +11,23 @@ from game_options.game_options import COLUMNS, ROWS, FONT_SIZE, PADDING, \
 from game_options.Snake import Snake
 from game_options.Rect import Rect
 
+from database.Database import db_conn
+
 
 class Game:
     def __init__(
             self,
-            columns=COLUMNS,
-            rows=ROWS,
-            font_size=FONT_SIZE,
-            padding=PADDING,
-            fps=FPS
-    ):
+            player: Player,
+            game_id: int,
+            columns: int = COLUMNS,
+            rows: int = ROWS,
+            font_size: int = FONT_SIZE,
+            padding: int = PADDING,
+            fps: int = FPS,
 
+    ):
+        self.player = player
+        self.game_id = game_id
         self.game_over = False
         self.columns = columns
         self.rows = rows
@@ -102,6 +109,11 @@ class Game:
                     self.snake.set_speed([-1, 0])
 
     def run_game(self):
+        db_conn.add_game_session_log(
+            self.game_id,
+            "Начало игры",
+            "info"
+        )
         food = self.generate_random_food()
         self.set_screen_params(font_count)
         self.draw_map()
@@ -142,6 +154,8 @@ class Game:
 
                 if food == self.snake.head:
                     count += 1
+                    if count >= self.player.best_scores:
+                        self.player.best_scores = count
                     font_count.render(f"Счет: {count}")
                     food = self.generate_random_food()
                     if count % 10 == 0:
