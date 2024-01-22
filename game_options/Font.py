@@ -27,11 +27,11 @@ class FontsParametrs:
 
 
 font_count = FontsParametrs(
-    size=60,
+    size=50,
     text='Счет: 0',
     antialias=True,
     color=(255, 255, 255),
-    topleft=(20, 20)
+    topleft=(20, 30)
 )
 
 font_game_over = FontsParametrs(
@@ -40,4 +40,20 @@ font_game_over = FontsParametrs(
     antialias=True,
     color=(255, 255, 255),
     topleft=(20, 20)
+)
+
+font_player = FontsParametrs(
+    size=50,
+    text='Игрок: ',
+    antialias=True,
+    color=(255, 255, 255),
+    topleft=(20, 20)
+)
+
+font_leaderboard = FontsParametrs(
+    size=40,
+    text='',
+    antialias=True,
+    color=(255, 255, 255),
+    center=(20, 20)
 )
