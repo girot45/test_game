@@ -6,20 +6,19 @@ DATABASE_CREATE_TABLES = '''CREATE TABLE IF NOT EXISTS players (
                 reg_date TEXT NOT NULL,
                 best_scores INTEGER NOT NULL DEFAULT 0 
             );
-               
-            CREATE TABLE IF NOT EXISTS game_session (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                time_start VARCHAR,
-                player_id INTEGER,
-                scores INTEGER NOT NULL DEFAULT 0,
-                FOREIGN KEY (player_id) REFERENCES players(id)
-            );
             
-            CREATE TABLE IF NOT EXISTS game_session_logs (
+            CREATE TABLE IF NOT EXISTS logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                game_id INTEGER NOT NULL,
                 event_description TEXT NOT NULL,
                 event_status TEXT NOT NULL,
-                datetime VARCHAR,
-                FOREIGN KEY (game_id) REFERENCES game_session(id)
-            );'''
+                datetime VARCHAR
+            );
+            INSERT INTO players (name, reg_date, best_scores) 
+            VALUES ('John', '2020-01-01', 0);
+            INSERT INTO players (name, reg_date, best_scores) 
+            VALUES ('Jane', '2020-01-02', 5);
+            INSERT INTO players (name, reg_date, best_scores) 
+            VALUES ('Alice', '2020-01-03', 14);
+            INSERT INTO players (name, reg_date, best_scores) 
+            VALUES ('Martin', '2020-01-04', 43)
+            '''
